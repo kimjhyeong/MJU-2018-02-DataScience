@@ -18,6 +18,9 @@ ggplot(data=dat0, aes(x=x1, y=y)) +
   facet_grid(x2 ~ .) + 
   geom_boxplot(width=0.2)
 
+summary(dat0)
+
+
 rpart(y ~ x1 + x2, data = dat0)
 
 aa <- rnorm(100, 20,1)
@@ -36,7 +39,7 @@ ggplot(data=dat1, aes(x=x1, y=y)) +
 rpart(y ~ x1 + x2, data = dat1)
 
 library(nnet)
-fit <- nnet(y ~ x1 + x2, linout=TRUE, size =10, data = dat0)
+fit <- nnet(y ~ x1 + x2, linout=TRUE, size =10, data = dat1)
 
 predict(fit)
 table(predict(fit))
@@ -44,29 +47,31 @@ table(predict(fit))
 # 물론 회귀나무로도 할 수 있다.
 #rpart(y ~ x1 + x2, data = dat0, 
 #      control=rpart.control(cp=0.00))
-
+library(rpart)
 library(rpart.plot)
 library(dplyr)
 
-x1 <- rnorm(100, 0, 1)
-x2 <- rnorm(100, 0, 1)
+x1 <- rnorm(1000, 0, 1)
+x2 <- rnorm(1000, 0, 1)
 
 y <- x1 - x2 + rnorm(100, 0, 1)
 
+lm(y ~., data.frame(x1=x1, x2-x2, y=y))
+
 dat = data.frame(x1=x1, x2=x2, y=y)
 
-fitDT <- rpart(y ~ x1 + x2, data = dat %>% slice(1:80))
+fitDT <- rpart(y ~ x1 + x2, data = dat %>% slice(1:800))
 
 rpart.plot(fitDT)
 
-fitNN <- nnet(y ~ x1 + x2, linout=TRUE, size=10, data=dat %>% slice(1:80))
+fitNN <- nnet(y ~ x1 + x2, linout=TRUE, size=10, data=dat %>% slice(1:800))
 #plot(fitNN)
 
-mean((dat$y[1:80] - predict(fitNN))^2)
-mean((dat$y[1:80] - predict(fitDT))^2)
+mean((dat$y[1:800] - predict(fitNN))^2)
+mean((dat$y[1:800] - predict(fitDT))^2)
 
-mean((dat$y[81:100] - predict(fitNN, newdata=dat %>% slice(81:100)))^2)
-mean((dat$y[81:100] - predict(fitDT, newdata=dat %>% slice(81:100)))^2)
+mean((dat$y[801:1000] - predict(fitNN, newdata=dat %>% slice(801:1000)))^2)
+mean((dat$y[801:1000] - predict(fitDT, newdata=dat %>% slice(801:1000)))^2)
 
 # Try new NN with the number of hidden nodes being 2.
 
@@ -93,5 +98,9 @@ RMSE(dat$y, predict(fit0))
 fit1 <- lm(y ~ I(x1^2), data=dat)
 RMSE(dat$y, predict(fit1))
 
+nnet
+caret::avNNet
 
+train(method='nnet')
+train(method='avNNet')
 # 
